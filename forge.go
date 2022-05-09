@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /*
 A note about the provided keys and signatures:
@@ -119,16 +121,85 @@ func Forge() (string, Signature, error) {
 	fmt.Printf("ok 3: %v\n", Verify(msgslice[2], pub, sig3))
 	fmt.Printf("ok 4: %v\n", Verify(msgslice[3], pub, sig4))
 
-	msgString := "my forged message"
-	var sig Signature
+	msgString := "phuc16102001 forge %d"
 
 	// your code here!
 	// ==
-	// Geordi La
+	var sig Signature
+	cnt := 0
+	sameIndex, sameValue := GetIndexSameBlock(msgslice)
+	for {
+		cnt = cnt + 1
+		testString := fmt.Sprintf(msgString, cnt)
+
+		if CanForge(testString, sameIndex, sameValue) {
+			new_sig, _ := GenerateSignature(testString, msgslice, sigslice)
+			sig = new_sig
+			msgString = testString
+			break
+		}
+	}
+	fmt.Println(msgString)
 	// ==
-
 	return msgString, sig, nil
+}
 
+func GetIndexSameBlock(msgslice []Message) ([]int, []byte) {
+	var index []int
+	var value []byte
+	for k := 0; k < 256; k++ {
+		bitFirst := (msgslice[0][k/8] >> (7 - (k % 8))) & 1
+		same := true
+		for i, _ := range msgslice {
+			bitNext := (msgslice[i][k/8] >> (7 - (k % 8))) & 1
+			if bitFirst != bitNext {
+				same = false
+				break
+			}
+		}
+		if same {
+			index = append(index, k)
+			value = append(value, bitFirst)
+		}
+	}
+	return index, value
+}
+
+func CanForge(msg string, sameIndex []int, sameValue []byte) bool {
+	hashed := GetMessageFromString(msg)
+	for i, _ := range sameIndex {
+		index := sameIndex[i]
+		bit := (hashed[index/8] >> (7 - (index % 8))) & 1
+		if bit != sameValue[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func GenerateSignature(
+	msgString string,
+	msgslice []Message,
+	sigslice []Signature) (Signature, bool) {
+	var sig Signature
+
+	hashedMessage := GetMessageFromString(msgString)
+	for k, _ := range sig.Preimage {
+		bitForge := (hashedMessage[k/8] >> (7 - (k % 8))) & 1
+		checked := false
+		for i, _ := range msgslice {
+			bitMsg := (msgslice[i][k/8] >> (7 - (k % 8))) & 1
+			if bitForge == bitMsg {
+				sig.Preimage[k] = sigslice[i].Preimage[k]
+				checked = true
+				break
+			}
+		}
+		if !checked {
+			return sig, false
+		}
+	}
+	return sig, true
 }
 
 // hint:
