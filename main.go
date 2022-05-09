@@ -281,7 +281,7 @@ func Sign(msg Message, sec SecretKey) Signature {
 	// Your code here
 	// ===
 	for i, _ := range sig.Preimage {
-		if ((msg[i/8] >> (8 - (i % 8))) & 1) == 0 {
+		if ((msg[i/8] >> (7 - (i % 8))) & 1) == 0 {
 			sig.Preimage[i] = sec.ZeroPre[i]
 		} else {
 			sig.Preimage[i] = sec.OnePre[i]
@@ -302,7 +302,7 @@ func Verify(msg Message, pub PublicKey, sig Signature) bool {
 	// Your code here
 	// ===
 	for i, _ := range target {
-		if ((msg[i/8] >> (8 - (i % 8))) & 1) == 0 {
+		if ((msg[i/8] >> (7 - (i % 8))) & 1) == 0 {
 			target[i] = pub.ZeroHash[i]
 		} else {
 			target[i] = pub.OneHash[i]
