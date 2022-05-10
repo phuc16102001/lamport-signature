@@ -128,6 +128,7 @@ func Forge() (string, Signature, error) {
 	var sig Signature
 	cnt := 0
 	sameIndex, sameValue := GetIndexSameBlock(msgslice)
+	fmt.Printf("Must match %d bits\n", len(sameIndex))
 	for {
 		cnt = cnt + 1
 		testString := fmt.Sprintf(msgString, cnt)

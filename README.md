@@ -1,67 +1,67 @@
-# Problem Set 1
+# Lamport signature
 
-In the first part of this problem set, you'll implement Lamport signatures.  In the second part, you'll take advantage of incorrect usage to forge signatures.
+## Introduction
+The project implement the Lamport Signature which is a Digital signature. Furthermore, its weakness is spotted out by forging a signature. 
 
-## Getting started
+## What is Lamport signature
+Digital signature has played a very important roles in many system recently, especially in Blockchain. The Lamport signature is a hash-based digital signature which was invented by `Leslie Lamport` in 1979.
 
-You'll implement all labs in Go. The [Go website](https://golang.org/) contains a lot of useful information including a tutorial for learning Go if you're not already familiar with it.
+## How does Lamport signature work?
 
-You will probably find it most convenient to install Go 1.9 on your own computer, but you can also use it on Athena.
+### Create secret and public keys
+- Create SK:
+  - Generate 256*2 blocks randomly (in 2 rows), each block is 32-bytes (just flipping coin)
+- Create PK:
+  - Get hashes for each block (in total 256*2 blocks)
 
-You can use a regular editor like vim / emacs / notepad.exe.  There is also a go-specific open source IDE that Tadge recommends & uses, [LiteIDE](https://github.com/visualfc/liteide) which may make things easier.
+![lamport-genkey](img/lamport-genkey.png)
 
-In order to submit your lab, you'll need to use git.  You can read about [git here](https://www.kernel.org/pub/software/scm/git/docs/user-manual.html).
+### Signing message
+- Sign message:
+  - Hash the message with SHA256 -> To create fixed message (**256 bits**)
+  - For each bit, the SK reveal the corresponding block
+  - Example: 0100 will reveal $[b_0,a_1,b_2,b_3]$
+  - Generally, the signature will has 256 blocks whose size is 32 bytes
 
-## Collaboration Policy
+![lamport-sign](img/lamport-sign.png)
 
-You must write all of the code you hand in, except for what we give you with the assignment.  You may discuss the assignments with other students, but you should not look at or copy each other's code.
+### Verify signatures
+- Verify:
+  - In the same way, the receiver first hash the message
+  - Then they hash each block of signature 
+  - Finally, the compare the corresponding hashed block with the public key
 
-## Part 1
+![lamport-verify](img/lamport-verify.png)
 
-In this problem set, you will build a hash-based signature system.  It will be helpful to read about [Lamport signatures](https://en.wikipedia.org/wiki/Lamport_signature).
+> The receiver only know half of your SK, but... they cannot do anything else, except signing the same message. But... whoever do that since they can copy your signed message?
 
-Implement the `GenerateKey()`, `Sign()` and `Verify()` functions in `main.go`.  When you have done so correctly, the program should print `Verify worked? true`.  You can test this by doing the following:
+## Can it be forged?
+The answer is **yes!**.
+> Keep in mind that the more you sign, the more your SK revealed!
 
-```
-go build
-./pset01
-```
+In this assignment, they have provided 4 messages with signatures. For each bit in the hashed messages, if you have both 0-bit and 1-bit, indeed, you have the private key of that block. 
 
-Hint: You will need to look at the bits in each byte in a hash.  You can use [bit operators](https://medium.com/learning-the-go-programming-language/bit-hacking-with-go-e0acee258827) in order to do so.
+The four provided data already have 225 bits which are statisfied the requirement above. It means that only 31 bits need to be constrained. this requires only $2^{31}$ different try, which is doable with the machine nowdays.
 
-Make sure your code passes the tests by running:
+By this way, I added a random number follows after the message and increase it continously until they all reach the requirement.
 
-```
-go test
-```
+## How to run the source?
+There are two main implementations which are:
+- The Lamport signature: `main.go`
+- The source to forge signature: `forge.go`
 
-## Part 2
+For each implementation, there is a corresponding unit test. To run the test, you can type in your terminal
+```Bash
+$ go test src/*.go
+``` 
 
-There is a public key and 4 signatures provided in the signatures.go file.  Given this data, you should be able to forge another signature of your choosing.  Make the message which you sign have the word "forge" in it, and also your name or email address.  There is a forge_test.go file which will check for the term 'forge' in the signed message.
+However, because the forging process may require a lot of time to run, you can change the timeout to 30 minutes with the following command (by default is 10 minutes):
+```Bash
+$ go test src/*.go --timeout 30m
+``` 
 
-Note that this may take a decent amount of CPU time even on a good computer.  We're not talking days or anything though; 4 signatures is enough to make it so that an efficient implementation is relatively quick.
+## Contribution
+This implementation is owned by [phuc16102001](https://www.github.com/phuc16102001), and as the policy of MIT, please **do not look or copy it**.
 
-To make sure you're in the right ballpark: On an AMD Ryzen 7 1700 CPU, using 8 cores, my (adiabat / Tadge) implementation could create a forgery in about 3 minutes of real time.  An equally efficient signle core implementation would take about 25 minutes.  On slower CPUs or with less efficient code it may take longer.
-
-If you use CUDA or AVX-512 or AES-NI or something crazy like that and get it to run in 5 seconds, cool!  It should still run in go and pass the tests here, but note that you can do all the "work" in a different program and import the solution to this code if you want.
-
-That's certainly not necessary though as it shouldn't take that long on most computers.  A raspberry pi might be too slow though.  If you get the forge_test.go test to pass, you're probably all set!  just run
-
-```
-go test
-```
-and see what fun errors you get! :)
-
-## Testing and Timeouts
-
-To run tests,
-```
-$ go test
-```
-will work, but by default it will give up after 10 minutes.  If your functions need more time to complete, you can change the timeout by typing
-```
-$ go test -timeout 30m
-```
-to timeout after 30 minutes instead of 10.
-
-## Submission
+## Reference
+This is an assignment that I took from [Cryptocurrency engineering and design](https://ocw.mit.edu/courses/mas-s62-cryptocurrency-engineering-and-design-spring-2018) of the MIT open courseware.
