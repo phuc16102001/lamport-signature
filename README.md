@@ -41,7 +41,7 @@ The answer is **yes!**.
 
 In this assignment, they have provided 4 messages with signatures. For each bit in the hashed messages, if you have both 0-bit and 1-bit, indeed, you have the private key of that block. 
 
-The four provided data already have 225 bits which are statisfied the requirement above. It means that only 31 bits need to be constrained. this requires only $2^{31}$ different try, which is doable with the machine nowdays.
+The four provided data already have 225 bits which are statisfied the requirement above. It means that only 31 bits need to be constrained. this requires only 2^31 different try, which is doable with the machine nowdays.
 
 By this way, I added a random number follows after the message and increase it continously until they all reach the requirement.
 
