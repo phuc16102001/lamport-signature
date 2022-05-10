@@ -20,7 +20,7 @@ Digital signature has played a very important roles in many system recently, esp
 - Sign message:
   - Hash the message with SHA256 -> To create fixed message (**256 bits**)
   - For each bit, the SK reveal the corresponding block
-  - Example: 0100 will reveal $[b_0,a_1,b_2,b_3]$
+  - Example: 0100 will reveal [col_0_row_0,col_1_row_1,col_2_row_0,col_3_row_0]
   - Generally, the signature will has 256 blocks whose size is 32 bytes
 
 ![lamport-sign](img/lamport-sign.png)
